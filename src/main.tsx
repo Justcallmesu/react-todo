@@ -50,6 +50,12 @@ const router = createBrowserRouter([
         
       },
     ]
+  },
+  {
+    path:"*",
+    loader:()=>{
+      return redirect("/")
+    }
   }
 ])
 
