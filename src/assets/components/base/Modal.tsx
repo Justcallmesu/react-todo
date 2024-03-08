@@ -1,4 +1,3 @@
-import {BaseSyntheticEvent, useState} from "react"
 export default function Modal({isError,modalMessage,modalCallback,resetModalState}:{isError:boolean,modalMessage:string,modalCallback:void,resetModalState:Function}){
 
     return(
