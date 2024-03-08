@@ -3,12 +3,38 @@ import { BaseSyntheticEvent, useRef } from "react"
 import { Check, Pencil, Trash2Fill } from "react-bootstrap-icons"
 import { useState } from "react"
 
-export default function TodoCard({title,date,isCompleted,_id,callback}:
-    {title:string,date:string,isCompleted:boolean,_id:string,callback:Function}){
+export default function TodoCard(
+
+    {
+        // Todo Data
+        title,date,isCompleted,_id,callback,
+        // Modal State
+        setIsModal,setIsError,setModalMessage
+    }:
+    {
+        // Todo Data
+        title:string,date:string,isCompleted:boolean,_id:string,callback:Function,
+        
+        // Modal State
+        setIsModal:Function,setIsError:Function,setModalMessage:Function
+    },
+    
+    ){
 
     const [isUpdate,setIsUpdate] = useState(false);
     const [scopedTitle,setScopedTitle] = useState(title);
     const textField:any = useRef();
+    
+    function ModalError(message:string="Somethings Wrong Try Again Later!"){
+        setIsModal(true);
+        setIsError(true);
+        setModalMessage(message)
+    }
+
+    function ModalSuccess(message:string="Update Success!"){
+        setIsModal(true);
+        setModalMessage(message)
+    }
 
     async function HandleChackbox(e:BaseSyntheticEvent){
         try{
@@ -16,9 +42,10 @@ export default function TodoCard({title,date,isCompleted,_id,callback}:
             {
                 title, isCompleted:e.target.checked
             },{withCredentials:true})
-
             callback()
-        }catch(error){}
+        }catch(error){
+            ModalError()
+        }
     }
 
     function HandleScopedChange(e:BaseSyntheticEvent){
@@ -29,8 +56,11 @@ export default function TodoCard({title,date,isCompleted,_id,callback}:
     async function HandleDelete(){
         try{
             await axios.delete(`${import.meta.env.VITE_REACT_APP_API_URL}todo/${_id}`,{withCredentials:true})
+            ModalSuccess("Todo Deleted")
             callback()
-        }catch(error){}
+        }catch(error){
+            ModalError()
+        }
     }
 
     async function HandleUpdate(){
@@ -39,7 +69,11 @@ export default function TodoCard({title,date,isCompleted,_id,callback}:
 
     async function HandleFinish(){
         setIsUpdate(false)
-        await axios.put(`${import.meta.env.VITE_REACT_APP_API_URL}todo/${_id}`,{title:scopedTitle},{withCredentials:true})
+        try{
+            await axios.put(`${import.meta.env.VITE_REACT_APP_API_URL}todo/${_id}`,{title:scopedTitle},{withCredentials:true})
+        }catch(error){
+            ModalError()
+        }
         callback()
     }
 
