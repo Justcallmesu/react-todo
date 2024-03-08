@@ -2,7 +2,7 @@ import { EyeFill,EyeSlashFill } from "react-bootstrap-icons"
 
 import {Link, useNavigate, useOutletContext} from "react-router-dom"
 import {useState} from 'react'
-import axios, { AxiosError, AxiosResponse } from "axios"
+import axios, {AxiosResponse } from "axios"
 
 export default function Login(){
     const navigate = useNavigate();

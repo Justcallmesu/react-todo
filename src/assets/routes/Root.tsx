@@ -1,13 +1,15 @@
-import { useLoaderData, useNavigate } from "react-router-dom"
+import { useLoaderData } from "react-router-dom"
+
+
+import TodoPage from "../components/pages/TodoPage"
 
 
 export default function Root(){
-    const userinfo = useLoaderData();
+    const {data:{data:{username}}}:any = useLoaderData();
 
-    console.log(userinfo);
     return(
-        <>
-            
-        </>
+        <div className="w-screen h-screen py-5 flex justify-center">
+            <TodoPage username={username}></TodoPage>            
+        </div>
     )
 }
