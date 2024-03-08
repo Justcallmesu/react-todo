@@ -82,7 +82,10 @@ export default function TodoCard(
             <header className="bg-primary px-5 py-2 flex justify-between items-center text-white">
                 <div className="flex gap-5 items-center">
                     <input type="checkbox" checked={isCompleted} onChange={HandleChackbox}/>
-                    <h5 className="font-bold ">{date}</h5>
+                    <div>
+                        <h5 className="font-bold ">{date}</h5>
+                        <h6 className={`${isCompleted? "text-red-600":"text-white"} font-bold`}>{isCompleted? "DONE":"TODO"}</h6>
+                    </div>
                 </div>
                 <div className="flex gap-2">
                     {
@@ -99,7 +102,6 @@ export default function TodoCard(
                     <input type="text" value={scopedTitle} onChange={HandleScopedChange} className="TextField" ref={textField}/>:
                     <h1>{title}</h1>
                 }
-                
             </section>
         </div>
     )
