@@ -90,18 +90,20 @@ export default function Todopage({username}:{username:string}){
                 // Modal
                 <Modal isError={isError} modalCallback={modalCallback} resetModalState={resetModalState} modalMessage={modalMessage}/>
             }
-            <main className="w-1/2 h-full rounded-lg shadow-2xl relative overflow-hidden">
-                <header className="bg-primary px-5 py-5 text-white flex justify-between items-center">
-                    <p className="text-xl">Welcome Back! <span className="font-bold">{username}</span></p>
-                    <button className="bg-white text-primary font-bold px-5 py-2 rounded-xl" onClick={HandleLogout}>Log Out</button>
-                </header>
-                <section className="w-full px-5 py-5 flex gap-5">
-                    <input type="text" name="" id="" className="TextField" placeholder="What in your mind ?" value={todoField} onChange={HandleTodoField}/>
-                    <button className="bg-primary text-white px-2 rounded-lg text-2xl" onClick={postTodo}>
-                        <Plus/>
-                    </button>
-                </section>
-                <section className="w-full h-full px-5 overflow-y-auto flex flex-col gap-5">
+            <main className="w-1/2 h-full rounded-lg shadow-2xl overflow-auto">
+                <div className="sticky top-0">
+                    <header className="bg-primary px-5 py-5 text-white flex justify-between items-center">
+                        <p className="text-xl">Welcome Back! <span className="font-bold">{username}</span></p>
+                        <button className="bg-white text-primary font-bold px-5 py-2 rounded-xl" onClick={HandleLogout}>Log Out</button>
+                    </header>
+                    <section className="w-full px-5 py-5 flex gap-5 bg-white">
+                        <input type="text" name="" id="" className="TextField" placeholder="What in your mind ?" value={todoField} onChange={HandleTodoField}/>
+                        <button className="bg-primary text-white px-2 rounded-lg text-2xl" onClick={postTodo}>
+                            <Plus/>
+                        </button>
+                    </section>
+                </div>
+                <section className="w-full min-h-full px-5 py-5 flex flex-col gap-5">
                     {
                         BuildTodo()
                     }
