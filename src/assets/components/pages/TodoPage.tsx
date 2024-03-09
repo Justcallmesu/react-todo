@@ -1,19 +1,21 @@
-import {Plus} from "react-bootstrap-icons"
-import {useState,useEffect, BaseSyntheticEvent} from 'react'
-import { useNavigate } from "react-router-dom";
+// DESIGN
+import { Layout } from 'antd';
+
+import {useState,useEffect} from 'react'
+
 import axios from "axios";
 
 // Components
 import Snackbar from "../base/Snackbar";
 import { TodoCategory } from "../base/Todolist/TodoCategory";
+import TheHeader from '../layout/TheHeader';
 
 export default function Todopage({username}:{username:string}){
-    // REDIRECT
-    const navigate = useNavigate();
+    // Layout
+    const {Header,Content} = Layout
 
     // STATE
     const [category, setCategory] = useState([]);
-    const [categoryField, setText] = useState("");
     
     async function GetTodo(){
         const response = await axios.get(`${import.meta.env.VITE_REACT_APP_API_URL}category`,{withCredentials:true})
@@ -27,28 +29,6 @@ export default function Todopage({username}:{username:string}){
     },[])
 
 
-    async function postTodo(){
-        if(!categoryField){
-            setIsError(true);
-            setIsSnackbar(true);
-            setSnackbarMessage("Category Cannot be Empty!");
-            return;
-        }
-
-        await axios.post(`${import.meta.env.VITE_REACT_APP_API_URL}category`,{title:categoryField},{withCredentials:true})
-        GetTodo()
-        setText("")
-
-    }
-
-    function HandleTodoField(e:BaseSyntheticEvent){
-        setText(e.target.value)
-    }
-
-    async function HandleLogout(){
-        await axios.get(`${import.meta.env.VITE_REACT_APP_API_URL}auth/logout`,{withCredentials:true})
-        return navigate("/auth/login")
-    }
 
     // MODAL
     const [isSnackbarShown, setIsSnackbar] = useState(false)
@@ -79,23 +59,14 @@ export default function Todopage({username}:{username:string}){
                 <Snackbar message={snackbarMessage} isError={isError} resetState={resetSnackbarState}/>
             }
             <main className="w-full h-full shadow-2xl overflow-auto relative">
-                <div className="sticky top-0">
-                    <header className="bg-primary text-white flex justify-between items-center">
-                        <p className="text-xl">Welcome Back! <span className="font-bold">{username}</span></p>
-                        <button className="bg-white text-primary font-bold px-5 py-2 rounded-xl" onClick={HandleLogout}>Log Out</button>
-                    </header>
-                    <section className="w-full px-5 py-5 flex gap-5 bg-white">
-                        <input type="text" name="" id="" className="TextField" placeholder="What in your mind ?" value={categoryField} onChange={HandleTodoField}/>
-                        <button className="bg-primary text-white px-2 rounded-lg text-2xl" onClick={postTodo}>
-                            <Plus/>
-                        </button>
-                    </section>
-                </div>
-                <section className="w-full min-h-full px-5 py-5 flex flex-col gap-5">
-                    {
-                        BuildCategory()
-                    }
-                </section>            
+                <TheHeader username={username} GetTodo={GetTodo} snackbarCallback={{setSnackbarMessage,setIsError,setIsSnackbar}}/>
+                <Content>
+                    <section className="w-full min-h-full px-5 py-5 flex flex-col gap-5">
+                        {
+                            BuildCategory()
+                        }
+                    </section>            
+                </Content>
             </main>
         </>
     )
