@@ -4,8 +4,8 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
 // Components
-import Modal from "../base/Modal";
 import TodoCard from "../base/Todolist/TodoCard";
+import Snackbar from "../base/Snackbar";
 
 export default function Todopage({username}:{username:string}){
     // REDIRECT
@@ -37,9 +37,9 @@ export default function Todopage({username}:{username:string}){
             callback={GetTodo}
             key={_id}
             isCompleted={isCompleted}
-            setIsModal={setIsModal}
+            setIsModal={setIsSnackbar}
             setIsError={setIsError}
-            setModalMessage={setModalMessage}
+            setModalMessage={setSnackbarMessage}
             />
             )
         }
@@ -49,8 +49,8 @@ export default function Todopage({username}:{username:string}){
     async function postTodo(){
         if(!todoField){
             setIsError(true);
-            setIsModal(true);
-            setModalMessage("Todo Cannot be Empty!");
+            setIsSnackbar(true);
+            setSnackbarMessage("Todo Cannot be Empty!");
             return;
         }
 
@@ -70,27 +70,24 @@ export default function Todopage({username}:{username:string}){
     }
 
     // MODAL
-    const [isModalShown, setIsModal] = useState(false)
-    const [modalMessage, setModalMessage] = useState("")
-    const [modalCallback, setModalCallback] = useState(()=>{})
+    const [isSnackbarShown, setIsSnackbar] = useState(false)
+    const [snackbarMessage, setSnackbarMessage] = useState("")
     const [isError,setIsError] = useState(false)
 
-    function resetModalState(e:BaseSyntheticEvent){
-        e.stopPropagation();
+    function resetSnackbarState(){
         setIsError(false)
-        setModalMessage("")
-        setIsModal(false)
-        setModalCallback(()=>{})
+        setSnackbarMessage("")
+        setIsSnackbar(false)
     }
 
     return(
         <>
             {
-                isModalShown && 
+                isSnackbarShown && 
                 // Modal
-                <Modal isError={isError} modalCallback={modalCallback} resetModalState={resetModalState} modalMessage={modalMessage}/>
+                <Snackbar message={snackbarMessage} isError={isError} resetState={resetSnackbarState}/>
             }
-            <main className="w-1/2 h-full rounded-lg shadow-2xl overflow-auto">
+            <main className="w-1/2 h-full rounded-lg shadow-2xl overflow-auto relative">
                 <div className="sticky top-0">
                     <header className="bg-primary px-5 py-5 text-white flex justify-between items-center">
                         <p className="text-xl">Welcome Back! <span className="font-bold">{username}</span></p>
