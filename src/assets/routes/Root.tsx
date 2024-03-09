@@ -8,7 +8,7 @@ export default function Root(){
     const {data:{data:{username}}}:any = useLoaderData();
 
     return(
-        <div className="w-screen h-screen py-5 flex justify-center">
+        <div className="w-screen h-screen flex justify-center">
             <TodoPage username={username}></TodoPage>            
         </div>
     )
