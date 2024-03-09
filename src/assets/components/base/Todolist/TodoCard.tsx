@@ -7,13 +7,13 @@ export default function TodoCard(
 
     {
         // Todo Data
-        title,date,isCompleted,_id,callback,
+        title,date,isCompleted,_id,callback,categoryID,
         // Modal State
         setIsModal,setIsError,setModalMessage
     }:
     {
         // Todo Data
-        title:string,date:string,isCompleted:boolean,_id:string,callback:Function,
+        title:string,date:string,isCompleted:boolean,_id:string,callback:Function,categoryID:string
         
         // Modal State
         setIsModal:Function,setIsError:Function,setModalMessage:Function
@@ -38,7 +38,7 @@ export default function TodoCard(
 
     async function HandleChackbox(e:BaseSyntheticEvent){
         try{
-            await axios.put(`${import.meta.env.VITE_REACT_APP_API_URL}todo/${_id}`,
+            await axios.put(`${import.meta.env.VITE_REACT_APP_API_URL}todo/${categoryID}/${_id}`,
             {
                 title, isCompleted:e.target.checked
             },{withCredentials:true})
@@ -55,7 +55,7 @@ export default function TodoCard(
 
     async function HandleDelete(){
         try{
-            await axios.delete(`${import.meta.env.VITE_REACT_APP_API_URL}todo/${_id}`,{withCredentials:true})
+            await axios.delete(`${import.meta.env.VITE_REACT_APP_API_URL}todo/${categoryID}/${_id}`,{withCredentials:true})
             ModalSuccess("Todo Deleted")
             callback()
         }catch(error){
@@ -70,7 +70,7 @@ export default function TodoCard(
     async function HandleFinish(){
         setIsUpdate(false)
         try{
-            await axios.put(`${import.meta.env.VITE_REACT_APP_API_URL}todo/${_id}`,{title:scopedTitle},{withCredentials:true})
+            await axios.put(`${import.meta.env.VITE_REACT_APP_API_URL}todo/${categoryID}/${_id}`,{title:scopedTitle},{withCredentials:true})
         }catch(error){
             ModalError()
         }
