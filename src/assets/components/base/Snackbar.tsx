@@ -14,7 +14,7 @@ export default function Snackbar({message,isError,resetState}:{message:string,is
     },2000)
 
     return(
-        <div className="items-center bg-white fixed bottom-10 right-10 shadow-2xl w-1/3 flex gap-5 rounded-l-lg overflow-hidden z-10">
+        <div className="items-center bg-white fixed bottom-10 right-0 shadow-2xl w-1/3 flex gap-5 rounded-l-lg overflow-hidden z-20">
             <section className={`text-white text-3xl flex justify-center items-center ${StyleGetter()} p-2`}>
                 {
                     isError?
