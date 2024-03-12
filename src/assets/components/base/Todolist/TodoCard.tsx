@@ -1,7 +1,6 @@
 import axios from "axios"
-import { BaseSyntheticEvent, useRef } from "react"
-import { Check, Pencil, Trash2Fill } from "react-bootstrap-icons"
-import { useState } from "react"
+import { ,Pencil, Trash2Fill } from "react-bootstrap-icons"
+
 
 export default function TodoCard(
 
@@ -23,7 +22,7 @@ export default function TodoCard(
     ){
 
     // Modal
-    const {isModalShown, setIsModal,setModalCallback,setTargetId,setType} = modalFunction;
+    const { setIsModal,setTargetId,setType} = modalFunction;
     
     function ModalError(message:string="Somethings Wrong Try Again Later!"){
         setIsSnackbar(true);

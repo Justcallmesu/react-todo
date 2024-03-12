@@ -10,10 +10,10 @@ import { NavLink } from "react-router-dom";
 import axios from "axios"
 
 
-export default function TheHeader({username,snackbarCallback,GetTodo,modalFunction}:{username:string,snackbarCallback:any,GetTodo:Function,modalFunction:any}){    
+export default function TheHeader({username,snackbarCallback,modalFunction}:{username:string,snackbarCallback:any,modalFunction:any}){    
     // Modal
     const {isModalShown, setIsModal,setModalCallback,setTargetId,setType} = modalFunction;
-    const {setIsSnackbar,setSnackbarMessage,setIsError} = snackbarCallback
+    const {setIsSnackbar,setSnackbarMessage} = snackbarCallback
     // layout
     const {Header} = Layout;
 

@@ -134,7 +134,6 @@ export default function Todopage({username,categoryID}:{username:string,category
                 <Layout>
                     <TheHeader
                     username={username}
-                    GetTodo={GetTodo}
                     snackbarCallback={{setSnackbarMessage,setIsError,setIsSnackbar}}
                     modalFunction={{isModalShown,setIsModal,setModalCallback,setTargetId,setType}}
                     />
