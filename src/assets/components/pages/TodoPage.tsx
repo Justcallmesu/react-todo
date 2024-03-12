@@ -1,75 +1,101 @@
-import {Plus} from "react-bootstrap-icons"
-import {useState,useEffect, BaseSyntheticEvent} from 'react'
-import { useNavigate } from "react-router-dom";
+// DESIGN
+import { Layout } from 'antd';
+
+import {useState,useEffect,BaseSyntheticEvent} from 'react'
+
 import axios from "axios";
 
 // Components
 import Snackbar from "../base/Snackbar";
-import { TodoCategory } from "../base/Todolist/TodoCategory";
+import TheHeader from '../layout/TheHeader';
+import TodoCard from '../base/Todolist/TodoCard';
+import { Plus } from 'react-bootstrap-icons';
+import EmptyData from './error/EmptyData';
 
-export default function Todopage({username}:{username:string}){
-    // REDIRECT
-    const navigate = useNavigate();
+export default function Todopage({username,categoryID}:{username:string,categoryID:string}){
+    // Layout
+    const {Content} = Layout
+    // State
+    const [todo,setTodo] = useState([]);
+    const [todoField,setTodoField] = useState("");
 
-    // STATE
-    const [category, setCategory] = useState([]);
-    const [categoryField, setText] = useState("");
-    
-    async function GetTodo(){
-        const response = await axios.get(`${import.meta.env.VITE_REACT_APP_API_URL}category`,{withCredentials:true})
-        const {data:{data}} = response;
-
-        setCategory(data);
-    }
-
-    useEffect(()=>{
-        GetTodo()
-    },[])
-
-
-    async function postTodo(){
-        if(!categoryField){
-            setIsError(true);
-            setIsSnackbar(true);
-            setSnackbarMessage("Category Cannot be Empty!");
-            return;
-        }
-
-        await axios.post(`${import.meta.env.VITE_REACT_APP_API_URL}category`,{title:categoryField},{withCredentials:true})
-        GetTodo()
-        setText("")
-
-    }
-
-    function HandleTodoField(e:BaseSyntheticEvent){
-        setText(e.target.value)
-    }
-
-    async function HandleLogout(){
-        await axios.get(`${import.meta.env.VITE_REACT_APP_API_URL}auth/logout`,{withCredentials:true})
-        return navigate("/auth/login")
-    }
 
     // MODAL
     const [isSnackbarShown, setIsSnackbar] = useState(false)
     const [snackbarMessage, setSnackbarMessage] = useState("")
     const [isError,setIsError] = useState(false)
 
+    // General Function
     function resetSnackbarState(){
         setIsError(false)
         setSnackbarMessage("")
         setIsSnackbar(false)
     }
-
-    function BuildCategory(){
-        const elements:Array<JSX.Element>=[];
-
-        for (const data of category) {
-            const {_id,title} = data;
-            elements.push(<TodoCategory key={_id} title={title} categoryID={_id} snackbarCallback={{setSnackbarMessage,setIsError,setIsSnackbar}}/>)
-        }
-        return elements;
+    
+    async function GetTodo(){
+        const {data:{data}} = await axios.get(`${import.meta.env.VITE_REACT_APP_API_URL}todo/${categoryID||""}?isCompleted=false`,{withCredentials:true})
+        setTodo(data);
     }
+
+    useEffect(()=>{
+        GetTodo();
+    },[])
+
+
+    // Build Elements
+    function BuildTodo():Array<JSX.Element>{
+        const elements:Array<JSX.Element> = []
+        for(const data of todo){
+            const {title,isCompleted,DatePosted,_id} = data;
+            elements.push(<TodoCard 
+            title={title} 
+            date={new Date(DatePosted).toLocaleDateString("en-EN",{year:"numeric",month:"long",day:"2-digit"})} 
+            _id={_id}
+            callback={GetTodo}
+
+            key={_id}
+            isCompleted={isCompleted}
+            setIsModal={setIsSnackbar}
+            setIsError={setIsError}
+            setModalMessage={setSnackbarMessage}
+            />
+            )
+        }
+        return elements
+    }
+
+    // Handler
+    function handleTextChange(e:BaseSyntheticEvent){
+        setTodoField(e.target.value);
+    }
+
+    async function HandleSubmit(){
+        if(!todoField){
+            return;
+        }
+
+        try{
+            await axios.post(
+                `${import.meta.env.VITE_REACT_APP_API_URL}todo/${categoryID||""}`,
+                {title:todoField},
+                {withCredentials:true})
+
+            setIsError(false)
+            setSnackbarMessage("Todo Added")
+            setIsSnackbar(true)
+        }catch(error){
+            setIsError(true)
+            setSnackbarMessage("Post Fail to Added")
+            setIsSnackbar(true)
+        }
+        GetTodo()
+        setTodoField("")
+    }
+
+    // UseEffect
+    useEffect(()=>{
+        GetTodo()
+    },[categoryID])
 
     return(
         <>
@@ -78,25 +104,26 @@ export default function Todopage({username}:{username:string}){
                 // Modal
                 <Snackbar message={snackbarMessage} isError={isError} resetState={resetSnackbarState}/>
             }
-            <main className="w-full h-full shadow-2xl overflow-auto relative">
-                <div className="sticky top-0">
-                    <header className="bg-primary text-white flex justify-between items-center">
-                        <p className="text-xl">Welcome Back! <span className="font-bold">{username}</span></p>
-                        <button className="bg-white text-primary font-bold px-5 py-2 rounded-xl" onClick={HandleLogout}>Log Out</button>
-                    </header>
-                    <section className="w-full px-5 py-5 flex gap-5 bg-white">
-                        <input type="text" name="" id="" className="TextField" placeholder="What in your mind ?" value={categoryField} onChange={HandleTodoField}/>
-                        <button className="bg-primary text-white px-2 rounded-lg text-2xl" onClick={postTodo}>
-                            <Plus/>
-                        </button>
-                    </section>
-                </div>
-                <section className="w-full min-h-full px-5 py-5 flex flex-col gap-5">
-                    {
-                        BuildCategory()
-                    }
-                </section>            
-            </main>
+            <Layout className="w-full h-full shadow-2xl overflow-auto relative">
+                <Layout>
+                    <TheHeader username={username} GetTodo={GetTodo} snackbarCallback={{setSnackbarMessage,setIsError,setIsSnackbar}}/>
+                    <Content>
+                        <header className='w-full py-2 px-5 flex gap-5'>
+                            <input type="text" name="createTodo" className='TextField' placeholder='What is in your mind?' value={todoField} onChange={handleTextChange}/>
+                            <button className='text-2xl bg-primary rounded-full p-2 text-white' onClick={HandleSubmit}><Plus/></button>
+                        </header>
+                        {
+                            BuildTodo().length?
+                            <section className="w-full min-h-full px-5 py-5 grid grid-cols-5 grid-rows-3 gap-5">
+                            {
+                                BuildTodo()
+                            }
+                            </section>:
+                            <EmptyData/>   
+                        }
+                    </Content>
+                </Layout>
+            </Layout>
         </>
     )
 }

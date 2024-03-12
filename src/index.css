@@ -10,6 +10,9 @@
 	html {
 		@apply font-raleway;
 	}
+	a {
+		@apply relative;
+	}
 }
 
 @layer components {
@@ -27,4 +30,7 @@
 }
 
 @layer utilities {
+	a.current-page::after {
+		@apply content-[""] absolute -bottom-1 left-0 w-full h-[2px] bg-white;
+	}
 }

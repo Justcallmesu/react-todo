@@ -30,7 +30,14 @@ const router = createBrowserRouter([
         }catch(error){
           return redirect("auth/login")
         }
-        }
+    },
+    children:[
+      {
+        path:"/:categoryID",
+        id:"getByCategories",
+        
+      }
+    ]
   },
   {
     path:"/auth",
