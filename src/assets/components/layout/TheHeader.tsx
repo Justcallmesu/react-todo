@@ -1,11 +1,11 @@
-import {BoxArrowRight, GearFill, PersonFill} from "react-bootstrap-icons"
+import {BoxArrowRight, GearFill, PersonFill, PlusLg} from "react-bootstrap-icons"
 
 // ANTD
 import {Layout,Dropdown} from 'antd'
 import type { MenuProps } from "antd";
 
-import {BaseSyntheticEvent, useState} from 'react';
-import { Link } from "react-router-dom";
+import { useEffect, useState} from 'react';
+import { NavLink } from "react-router-dom";
 
 import axios from "axios"
 
@@ -13,6 +13,9 @@ import axios from "axios"
 export default function TheHeader({username,snackbarCallback,GetTodo}:{username:string,snackbarCallback:any,GetTodo:Function}){    
     // layout
     const {Header} = Layout;
+
+    // State
+    const [categories,setCategories] = useState([]);
 
     // Handler
     async function HandleLogout(){
@@ -23,9 +26,9 @@ export default function TheHeader({username,snackbarCallback,GetTodo}:{username:
     const items:MenuProps['items'] = [
         {
             label:(
-                <Link to={"/auth/login"} onClick={HandleLogout} className="flex items-center gap-2">
+                <NavLink to={"/auth/login"} onClick={HandleLogout} className="flex items-center gap-2">
                     <GearFill className="text-primary"/> Settings
-                </Link>
+                </NavLink>
             ),
             key:"settings"
         },
@@ -34,13 +37,55 @@ export default function TheHeader({username,snackbarCallback,GetTodo}:{username:
         },
         {
         label:(
-            <Link to={"/auth/login"} onClick={HandleLogout} className="flex items-center gap-2">
+            <NavLink to={"/auth/login"} onClick={HandleLogout} className="flex items-center gap-2">
                 <BoxArrowRight className="text-primary"/> Logout
-            </Link>
+            </NavLink>
         ),
         key:"logout"
     }]
 
+    // BUILD ELEMENTS
+    function buildCategoryNavLink(){
+        const elements:Array<JSX.Element>=[
+                <li>
+                    <NavLink to={'/'}
+                        className={({isActive}) => [
+                            isActive?"current-page":"",
+                        ].join(" ")
+                    }
+                    >All</NavLink>
+                </li>,
+        ];
+
+        for(const data of categories){
+            const {_id,title} = data
+            elements.push(
+                <li key={_id}>
+                    <NavLink to={`/${_id}`}
+                        className={({isActive}) => [
+                            isActive?"current-page":"",
+                        ].join(" ")
+                    }
+                    >{title}</NavLink>
+                </li>)
+        }
+
+        return elements;
+    }
+
+    // Get API
+    async function GetCategory(){
+        try{
+            const {data:{data}} = await axios.get(`${import.meta.env.VITE_REACT_APP_API_URL}category`,{withCredentials:true});
+            setCategories(data);
+        }catch(error){
+            console.error(error);
+        }
+    }
+
+    useEffect(()=>{
+        GetCategory();
+    },[])
 
     return(
         <Header className="sticky top-0 w-full h-fit p-0 bg-primary flex flex-col items-center shadow-md">
@@ -54,6 +99,18 @@ export default function TheHeader({username,snackbarCallback,GetTodo}:{username:
                     </Dropdown>
                 </section>
             </main>
+            <nav className="w-full px-5 border-t-2 border-white">
+                <ol className="py-2 flex items-center gap-5 text-xl font-semibold text-white">
+                    {
+                        buildCategoryNavLink()
+                    }
+                    <li >
+                        <button className="flex items-center">
+                            <PlusLg/>
+                        </button>
+                    </li>
+                </ol>
+            </nav>
         </Header>
     )
 }
