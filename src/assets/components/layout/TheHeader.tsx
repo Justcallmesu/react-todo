@@ -100,8 +100,8 @@ export default function TheHeader({username,snackbarCallback,modalFunction}:{use
     // BUILD ELEMENTS
     function buildCategoryNavLink(){
         const elements:Array<JSX.Element>=[
-                <li>
-                    <NavLink to={'/'} key="root"
+                <li key="root">
+                    <NavLink to={'/'}
                         className={({isActive}) => [
                             isActive?"current-page":"",
                         ].join(" ")
