@@ -13,7 +13,7 @@ export default function TodoCard(
     }:
     {
         // Todo Data
-        title:string,date:string,isCompleted:boolean,_id:string,callback:Function,
+        title:string,date:string,isCompleted:boolean,_id:string,callback:Function,categoryID?:string
         
         // Modal State
         setIsModal:Function,setIsError:Function,setModalMessage:Function
@@ -34,18 +34,6 @@ export default function TodoCard(
     function ModalSuccess(message:string="Update Success!"){
         setIsModal(true);
         setModalMessage(message)
-    }
-
-    async function HandleChackbox(e:BaseSyntheticEvent){
-        try{
-            await axios.put(`${import.meta.env.VITE_REACT_APP_API_URL}todo/${_id}`,
-            {
-                title, isCompleted:e.target.checked
-            },{withCredentials:true})
-            callback()
-        }catch(error){
-            ModalError()
-        }
     }
 
     function HandleScopedChange(e:BaseSyntheticEvent){
@@ -81,7 +69,6 @@ export default function TodoCard(
         <div className="w-full shadow-lg rounded-lg flex flex-col overflow-hidden">
             <header className="bg-primary px-5 py-2 flex justify-between items-center text-white">
                 <div className="flex gap-5 items-center">
-                    <input type="checkbox" checked={isCompleted} onChange={HandleChackbox}/>
                     <div>
                         <h5 className="font-bold ">{date}</h5>
                         <h6 className={`${isCompleted? "text-red-600":"text-white"} font-bold`}>{isCompleted? "DONE":"TODO"}</h6>

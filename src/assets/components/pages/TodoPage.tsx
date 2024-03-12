@@ -1,29 +1,39 @@
-import {Plus} from "react-bootstrap-icons"
-import {useState,useEffect, BaseSyntheticEvent} from 'react'
-import { useNavigate } from "react-router-dom";
+// DESIGN
+import { Layout } from 'antd';
+
+import {useState,useEffect} from 'react'
+
 import axios from "axios";
 
 // Components
-import Modal from "../base/Modal";
-import TodoCard from "../base/Todolist/TodoCard";
+import Snackbar from "../base/Snackbar";
+import TheHeader from '../layout/TheHeader';
+import TodoCard from '../base/Todolist/TodoCard';
 
 export default function Todopage({username}:{username:string}){
-    // REDIRECT
-    const navigate = useNavigate();
+    // Layout
+    const {Content} = Layout
 
-    // STATE
-    const [todo, setTodo] = useState([]);
-    const [todoField, setText] = useState("");
+        const [todo,setTodo] = useState([]);
+
+    // MODAL
+    const [isSnackbarShown, setIsSnackbar] = useState(false)
+    const [snackbarMessage, setSnackbarMessage] = useState("")
+    const [isError,setIsError] = useState(false)
+
+    function resetSnackbarState(){
+        setIsError(false)
+        setSnackbarMessage("")
+        setIsSnackbar(false)
+    }
     
     async function GetTodo(){
-        const response = await axios.get(`${import.meta.env.VITE_REACT_APP_API_URL}todo`,{withCredentials:true})
-        const {data:{data}} = response;
-
+        const {data:{data}} = await axios.get(`${import.meta.env.VITE_REACT_APP_API_URL}todo?isCompleted=false`,{withCredentials:true})
         setTodo(data);
     }
 
     useEffect(()=>{
-        GetTodo()
+        GetTodo();
     },[])
 
     function BuildTodo():Array<JSX.Element>{
@@ -35,80 +45,45 @@ export default function Todopage({username}:{username:string}){
             date={new Date(DatePosted).toLocaleDateString("en-EN",{year:"numeric",month:"long",day:"2-digit"})} 
             _id={_id}
             callback={GetTodo}
+
             key={_id}
             isCompleted={isCompleted}
-            setIsModal={setIsModal}
+            setIsModal={setIsSnackbar}
             setIsError={setIsError}
-            setModalMessage={setModalMessage}
+            setModalMessage={setSnackbarMessage}
             />
             )
         }
         return elements
     }
 
-    async function postTodo(){
-        if(!todoField){
-            setIsError(true);
-            setIsModal(true);
-            setModalMessage("Todo Cannot be Empty!");
-            return;
-        }
-
-        await axios.post(`${import.meta.env.VITE_REACT_APP_API_URL}todo`,{title:todoField},{withCredentials:true})
+    // UseEffect
+    useEffect(()=>{
         GetTodo()
-        setText("")
+    },[])
 
-    }
-
-    function HandleTodoField(e:BaseSyntheticEvent){
-        setText(e.target.value)
-    }
-
-    async function HandleLogout(){
-        await axios.get(`${import.meta.env.VITE_REACT_APP_API_URL}auth/logout`,{withCredentials:true})
-        return navigate("/auth/login")
-    }
-
-    // MODAL
-    const [isModalShown, setIsModal] = useState(false)
-    const [modalMessage, setModalMessage] = useState("")
-    const [modalCallback, setModalCallback] = useState(()=>{})
-    const [isError,setIsError] = useState(false)
-
-    function resetModalState(e:BaseSyntheticEvent){
-        e.stopPropagation();
-        setIsError(false)
-        setModalMessage("")
-        setIsModal(false)
-        setModalCallback(()=>{})
-    }
 
     return(
         <>
             {
-                isModalShown && 
+                isSnackbarShown && 
                 // Modal
-                <Modal isError={isError} modalCallback={modalCallback} resetModalState={resetModalState} modalMessage={modalMessage}/>
+                <Snackbar message={snackbarMessage} isError={isError} resetState={resetSnackbarState}/>
             }
-            <main className="w-1/2 h-full rounded-lg shadow-2xl overflow-auto">
-                <div className="sticky top-0">
-                    <header className="bg-primary px-5 py-5 text-white flex justify-between items-center">
-                        <p className="text-xl">Welcome Back! <span className="font-bold">{username}</span></p>
-                        <button className="bg-white text-primary font-bold px-5 py-2 rounded-xl" onClick={HandleLogout}>Log Out</button>
-                    </header>
-                    <section className="w-full px-5 py-5 flex gap-5 bg-white">
-                        <input type="text" name="" id="" className="TextField" placeholder="What in your mind ?" value={todoField} onChange={HandleTodoField}/>
-                        <button className="bg-primary text-white px-2 rounded-lg text-2xl" onClick={postTodo}>
-                            <Plus/>
-                        </button>
-                    </section>
-                </div>
-                <section className="w-full min-h-full px-5 py-5 flex flex-col gap-5">
-                    {
-                        BuildTodo()
-                    }
-                </section>            
-            </main>
+            <Layout className="w-full h-full shadow-2xl overflow-auto relative">
+                <Layout>
+                    <TheHeader username={username} GetTodo={GetTodo} snackbarCallback={{setSnackbarMessage,setIsError,setIsSnackbar}}/>
+                    <Content>
+                        <section className="w-full min-h-full px-5 py-5 flex flex-col gap-5">
+                            {
+                                BuildTodo()?
+                                <h1>Test</h1>:
+                                BuildTodo()
+                            }
+                        </section>            
+                    </Content>
+                </Layout>
+            </Layout>
         </>
     )
 }
