@@ -1,5 +1,5 @@
 import axios from "axios"
-import { ,Pencil, Trash2Fill } from "react-bootstrap-icons"
+import {Pencil, Trash2Fill } from "react-bootstrap-icons"
 
 
 export default function TodoCard(
