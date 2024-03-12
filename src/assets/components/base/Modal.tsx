@@ -1,21 +1,193 @@
-export default function Modal({isError,modalMessage,modalCallback,resetModalState}:{isError:boolean,modalMessage:string,modalCallback:void,resetModalState:Function}){
+import axios from "axios";
+import {useState,useEffect,BaseSyntheticEvent} from "react";
+
+export default function Modal(
+    {modalCallback,resetModalState,id,type="todo",snackbarFunction}:
+    {modalCallback:any,resetModalState:Function,id:string,type:string,snackbarFunction:any}){
+
+    const [titleText,setTitleText] = useState("");
+    const [categories,setCategories] = useState([]);
+    const [selected,setSelected] = useState("");
+    
+    // Reset State
+    function resetState(){
+        setTitleText("");
+        setCategories([]);
+        setSelected("");
+    }
+
+    // Use Context
+    const {setIsSnackbar,setSnackbarMessage,setIsError} = snackbarFunction;
+
+    // API Handler
+    async function getCategories(){
+        const response = await axios.get(`${import.meta.env.VITE_REACT_APP_API_URL}category`,{withCredentials:true})
+        try{
+            const {data:{data}} = response;
+            setCategories(data);
+        }catch(error){
+            resetModalState()
+        }
+    }
+
+    async function getDataBasedById(){
+        if(!id) return;
+        if(type === "todo"){ 
+            const response = await axios.get(`${import.meta.env.VITE_REACT_APP_API_URL}todo/${id}`,{withCredentials:true})
+            try{
+                const {data:{data}} = response;
+                setTitleText(data[0].title);
+            }catch(error){
+                resetModalState()
+            }
+            return
+        }
+        const response = await axios.get(`${import.meta.env.VITE_REACT_APP_API_URL}category/${id}`,{withCredentials:true})
+        try{
+            const {data:{data}} = response;
+            setTitleText(data[0].title);
+        }catch(error){
+            resetModalState()
+        }
+    }
+
+    // Elements Builder
+    function buildSelect(){
+        const elements:Array<JSX.Element>=[]
+
+        categories.forEach((value)=>{
+            const {title,_id} = value;
+            elements.push(
+                <option value={_id} key={_id} aria-description={_id}>
+                    {title}
+                </option>
+            )
+        })
+        return elements;
+    }
+
+    // Event Handler
+    function handleSelectOnChange(e:BaseSyntheticEvent){
+        setSelected(e.target.value);
+    }
+
+    function handleTextOnChange(e:BaseSyntheticEvent){
+        setTitleText(e.target.value);
+    }
+
+    async function handleTodo(){
+        if(!titleText || !selected){
+            setIsError(true)
+            setSnackbarMessage("Fill The Required Field!")
+            setIsSnackbar(true);
+            return
+        }
+
+        const data = {title:titleText,categoriesID:selected === "none"?"":selected};
+
+        if(id){
+            await axios.put(`${import.meta.env.VITE_REACT_APP_API_URL}todo/${id}`,data,{withCredentials:true});
+            await modalCallback;
+            resetModalState()
+            
+            setSnackbarMessage("Todo Updated")
+            setIsSnackbar(true);
+
+            return;
+        }
+    }
+
+    async function handleCategory(){
+        if(!titleText){
+            setIsError(true)
+            setSnackbarMessage("Fill The Required Field!")
+            setIsSnackbar(true);
+            return
+        }
+
+        const data = {title:titleText};
+
+        if(id){
+            await axios.put(`${import.meta.env.VITE_REACT_APP_API_URL}category/${id}`,data,{withCredentials:true});
+            resetModalState()
+            
+            setSnackbarMessage("Category Updated")
+            setIsSnackbar(true);
+            await modalCallback;
+            return;
+        }
+
+        await axios.post(`${import.meta.env.VITE_REACT_APP_API_URL}category`,data,{withCredentials:true});
+        
+        setSnackbarMessage("Category Posted")
+        setIsSnackbar(true);
+
+        await modalCallback;
+        resetModalState();
+    }
+
+    useEffect(()=>{
+        resetState();
+        getCategories();
+        getDataBasedById();
+    },[])
 
     return(
-        <div className="w-screen h-screen bg-opacity-50 bg-gray-700 fixed left-0 top-0 z-10 flex justify-center items-center" onClick={(e)=>{resetModalState(e);modalCallback}}>
-            <main className="w-4/5 h-2/3 rounded-lg lg:w-1/2 lg:h-1/2 bg-white px-5 py-5 flex flex-col">
-                {
-                    isError?
-                    <h3 className="ModalTitle">Oops Something Wrong!</h3>:
-                    <h3 className="ModalTitle">Hooray!</h3>
-                }
-                <hr className="mt-2 border-2 border-primary"/>
-                <section className="w-full h-full mt-2">
-                    <p className="text-xl">
-                        {modalMessage}
-                    </p>
-                </section>
-                <section className="flex justify-center">
-                    <button className="bg-[#28b498] text-white px-10 py-2 rounded-lg" onClick={(e)=>{resetModalState(e);modalCallback}}>Okay</button>
+        <div className="w-screen h-screen bg-opacity-50 bg-gray-700 fixed left-0 top-0 z-10 flex justify-center items-center">
+            <main className="w-4/5  rounded-lg lg:w-1/2  bg-white px-5 py-5 flex flex-col">
+                    <section className="flex flex-col gap-5">
+                        {
+                            type === "todo"?
+                            <>
+                                <div>
+                                    <h1 className="text-xl font-bold">Todo List</h1>
+                                    <hr />
+                                </div>
+                                <div>
+                                    <h1>Title</h1>
+                                    <input type="text" name="title" id="title" className="TextField" value={titleText} onChange={handleTextOnChange}/>
+                                </div>
+                                <div>
+                                    <h1>Categories</h1>
+                                    <select name="categories" id="categories" className="TextField" value={selected}
+                                    onChange={handleSelectOnChange}>
+                                        <option disabled value="" hidden>Select Categories</option>
+                                        <option value="none">None</option>
+                                        {
+                                            buildSelect()
+                                        }
+                                    </select>
+                                </div>
+                            </>
+                            :
+                            <>
+                                <div>
+                                    <h1 className="text-xl font-bold">Categories</h1>
+                                    <hr />
+                                </div>
+                                <div>
+                                    <h1>Title</h1>
+                                    <input type="text" name="title" id="title" className="TextField" value={titleText} onChange={handleTextOnChange}/>
+                                </div>
+                            </>
+                        }
+                    </section>
+
+
+                <section className="flex gap-5 pt-5">
+                    <button className="bg-red-500 text-white px-5 py-1 rounded-full"
+                        onClick={()=>{
+                            resetModalState();
+                        }}
+                    >
+                        Cancel
+                    </button>
+                    <button className="bg-primary text-white px-5 py-1 rounded-full"
+                        onClick={()=>{
+                            if(type === "todo") return handleTodo();
+                            handleCategory();
+                        }}
+                    >Confirm</button>
                 </section>
             </main>
         </div>

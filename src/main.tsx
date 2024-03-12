@@ -20,7 +20,7 @@ import Register from './assets/routes/Register'
 
 const router = createBrowserRouter([
   {
-    path:"/",
+    path:"/:categoryID?",
     id:"root",
     element:<Root/>,
     loader:async ()=>{
@@ -30,7 +30,7 @@ const router = createBrowserRouter([
         }catch(error){
           return redirect("auth/login")
         }
-        }
+    },
   },
   {
     path:"/auth",

@@ -1,31 +1,94 @@
-import {Plus} from "react-bootstrap-icons"
-import {useState,useEffect, BaseSyntheticEvent} from 'react'
-import { useNavigate } from "react-router-dom";
+// DESIGN
+import { Dropdown, Layout, MenuProps } from 'antd';
+
+import {useState,useEffect,BaseSyntheticEvent} from 'react'
+
 import axios from "axios";
 
 // Components
-import Modal from "../base/Modal";
-import TodoCard from "../base/Todolist/TodoCard";
+import Snackbar from "../base/Snackbar";
+import TheHeader from '../layout/TheHeader';
+import TodoCard from '../base/Todolist/TodoCard';
+import { Check2, ClipboardCheckFill, FunnelFill, Plus } from 'react-bootstrap-icons';
+import EmptyData from './error/EmptyData';
+import Modal from '../base/Modal';
 
-export default function Todopage({username}:{username:string}){
-    // REDIRECT
-    const navigate = useNavigate();
+export default function Todopage({username,categoryID}:{username:string,categoryID:string}){
+    // Layout
+    const {Content} = Layout
+    // State
+    const [todo,setTodo] = useState([]);
+    const [todoField,setTodoField] = useState("");
+    const [filter,setFilter] = useState("");
 
-    // STATE
-    const [todo, setTodo] = useState([]);
-    const [todoField, setText] = useState("");
+
+    // Snackbar
+    const [isSnackbarShown, setIsSnackbar] = useState(false)
+    const [snackbarMessage, setSnackbarMessage] = useState("")
+    const [isError,setIsError] = useState(false)
+
+    // Modal
+    const [isModalShown, setIsModal] = useState(false)
+    const [modalCallback,setModalCallback] = useState(function():any{return;})
+    const [targetId,setTargetId] = useState("");
+    const [modalType,setType] = useState("todo");
+
+    // Get Class
+    function getClass(active:string){
+        return active === filter && "text-primary"; 
+    }
+
+    // Menu
+    const items:MenuProps['items'] = [{
+        label:(
+            <button className={`flex gap-3 items-centerw-full ${getClass("Done")}`} onClick={()=>handleFilter("Done")}>
+                <Check2/>
+                Done
+            </button>
+        ),
+        key:"FilterDone"
+    },
+    {
+        label:(
+            <button className={`flex gap-3 items-centerw-full ${getClass("Todo")}`} onClick={()=>handleFilter("Todo")}>
+                <ClipboardCheckFill/>
+                Todo
+            </button>
+        ),
+        key:"FilterDone"
+    }
+]
+
+    // General Function
+    function resetSnackbarState(){
+        setIsError(false);
+        setSnackbarMessage("");
+        setIsSnackbar(false);
+    }
+
+    function resetModalSatate(){
+        setIsModal(false);
+        setModalCallback(()=>{});
+        setTargetId("");
+        setType("");
+    }
     
     async function GetTodo(){
-        const response = await axios.get(`${import.meta.env.VITE_REACT_APP_API_URL}todo`,{withCredentials:true})
-        const {data:{data}} = response;
+        let query = `&`;
 
+        if(filter === "Done") query +="isCompleted=true"
+        else if(filter === "Todo") query +="isCompleted=false"
+
+        const {data:{data}} = await axios.get(`${import.meta.env.VITE_REACT_APP_API_URL}todo?categoriesID=${categoryID||""}${query}`,{withCredentials:true})
         setTodo(data);
     }
 
     useEffect(()=>{
-        GetTodo()
-    },[])
+        GetTodo();
+    },[isModalShown,filter])
 
+
+    // Build Elements
     function BuildTodo():Array<JSX.Element>{
         const elements:Array<JSX.Element> = []
         for(const data of todo){
@@ -35,78 +98,102 @@ export default function Todopage({username}:{username:string}){
             date={new Date(DatePosted).toLocaleDateString("en-EN",{year:"numeric",month:"long",day:"2-digit"})} 
             _id={_id}
             callback={GetTodo}
+
             key={_id}
             isCompleted={isCompleted}
-            setIsModal={setIsModal}
+            setIsSnackbar={setIsSnackbar}
             setIsError={setIsError}
-            setModalMessage={setModalMessage}
+            setSnackbarMessage={setSnackbarMessage}
+
+            modalFunction={{isModalShown,setIsModal,setModalCallback,setTargetId,setType}}
             />
             )
         }
         return elements
     }
 
-    async function postTodo(){
+    // Handler
+    function handleTextChange(e:BaseSyntheticEvent){
+        setTodoField(e.target.value);
+    }
+
+    function handleFilter(type:string){
+        if(type === filter) return setFilter("")
+        setFilter(type);
+    }
+
+    async function HandleSubmit(){
         if(!todoField){
-            setIsError(true);
-            setIsModal(true);
-            setModalMessage("Todo Cannot be Empty!");
             return;
         }
 
-        await axios.post(`${import.meta.env.VITE_REACT_APP_API_URL}todo`,{title:todoField},{withCredentials:true})
+        try{
+            await axios.post(
+                `${import.meta.env.VITE_REACT_APP_API_URL}todo?categoriesID=${categoryID||""}`,
+                {title:todoField},
+                {withCredentials:true})
+
+            setIsError(false)
+            setSnackbarMessage("Todo Added")
+            setIsSnackbar(true)
+        }catch(error){
+            setIsError(true)
+            setSnackbarMessage("Post Fail to Added")
+            setIsSnackbar(true)
+        }
         GetTodo()
-        setText("")
-
+        setTodoField("")
     }
 
-    function HandleTodoField(e:BaseSyntheticEvent){
-        setText(e.target.value)
-    }
-
-    async function HandleLogout(){
-        await axios.get(`${import.meta.env.VITE_REACT_APP_API_URL}auth/logout`,{withCredentials:true})
-        return navigate("/auth/login")
-    }
-
-    // MODAL
-    const [isModalShown, setIsModal] = useState(false)
-    const [modalMessage, setModalMessage] = useState("")
-    const [modalCallback, setModalCallback] = useState(()=>{})
-    const [isError,setIsError] = useState(false)
-
-    function resetModalState(e:BaseSyntheticEvent){
-        e.stopPropagation();
-        setIsError(false)
-        setModalMessage("")
-        setIsModal(false)
-        setModalCallback(()=>{})
-    }
+    // UseEffect
+    useEffect(()=>{
+        GetTodo()
+    },[categoryID])
 
     return(
-        <>
+        <>  
             {
-                isModalShown && 
+                isSnackbarShown && 
                 // Modal
-                <Modal isError={isError} modalCallback={modalCallback} resetModalState={resetModalState} modalMessage={modalMessage}/>
+                <Snackbar message={snackbarMessage} isError={isError} resetState={resetSnackbarState}/>
             }
-            <main className="w-1/2 h-full rounded-lg shadow-2xl relative overflow-hidden">
-                <header className="bg-primary px-5 py-5 text-white flex justify-between items-center">
-                    <p className="text-xl">Welcome Back! <span className="font-bold">{username}</span></p>
-                    <button className="bg-white text-primary font-bold px-5 py-2 rounded-xl" onClick={HandleLogout}>Log Out</button>
-                </header>
-                <section className="w-full px-5 py-5 flex gap-5">
-                    <input type="text" name="" id="" className="TextField" placeholder="What in your mind ?" value={todoField} onChange={HandleTodoField}/>
-                    <button className="bg-primary text-white px-2 rounded-lg text-2xl" onClick={postTodo}>
-                        <Plus/>
-                    </button>
-                </section>
-                <section className="w-full h-full px-5 overflow-y-auto flex flex-col gap-5">
-                    {
-                        BuildTodo()
-                    }
-                </section>            
-            </main>
+            {
+                isModalShown&&
+                <Modal 
+                modalCallback={modalCallback}
+                resetModalState={resetModalSatate}
+                id={targetId}
+                type={modalType}
+                snackbarFunction={{setIsSnackbar,setSnackbarMessage,setIsError}}
+                />
+            }
+                <Layout className="w-full h-full shadow-2xl overflow-auto relative">
+                <Layout>
+                    <TheHeader
+                    username={username}
+                    snackbarCallback={{setSnackbarMessage,setIsError,setIsSnackbar}}
+                    modalFunction={{isModalShown,setIsModal,setModalCallback,setTargetId,setType}}
+                    />
+                    <Content>
+                        <header className='w-full py-2 px-5 flex gap-5'>
+                            <input type="text" name="createTodo" className='TextField' placeholder='What is in your mind?' value={todoField} onChange={handleTextChange}/>
+                            <button className='text-2xl bg-primary rounded-full p-2 text-white' onClick={HandleSubmit}><Plus/></button>
+                            <Dropdown menu={{items}} arrow={true} placement='bottomRight'>
+                                <button className='text-2xl bg-primary rounded-full p-2 text-white' onClick={HandleSubmit}><FunnelFill/></button>
+                            </Dropdown>
+                        </header>
+                        {
+                            BuildTodo().length?
+                            <section className="w-full min-h-full px-5 py-5 grid grid-cols-5 grid-rows-3 gap-5">
+                            {
+                                BuildTodo()
+                            }
+                            </section>:
+                            <EmptyData/>   
+                        }
+                    </Content>
+                </Layout>
+            </Layout>
         </>
     )
 }
