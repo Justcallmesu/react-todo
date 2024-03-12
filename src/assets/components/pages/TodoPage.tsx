@@ -1,5 +1,5 @@
 // DESIGN
-import { Layout } from 'antd';
+import { Dropdown, Layout, MenuProps } from 'antd';
 
 import {useState,useEffect,BaseSyntheticEvent} from 'react'
 
@@ -9,7 +9,7 @@ import axios from "axios";
 import Snackbar from "../base/Snackbar";
 import TheHeader from '../layout/TheHeader';
 import TodoCard from '../base/Todolist/TodoCard';
-import { Plus } from 'react-bootstrap-icons';
+import { Check2, ClipboardCheckFill, FunnelFill, Plus } from 'react-bootstrap-icons';
 import EmptyData from './error/EmptyData';
 import Modal from '../base/Modal';
 
@@ -19,6 +19,7 @@ export default function Todopage({username,categoryID}:{username:string,category
     // State
     const [todo,setTodo] = useState([]);
     const [todoField,setTodoField] = useState("");
+    const [filter,setFilter] = useState("");
 
 
     // Snackbar
@@ -31,6 +32,32 @@ export default function Todopage({username,categoryID}:{username:string,category
     const [modalCallback,setModalCallback] = useState(function():any{return;})
     const [targetId,setTargetId] = useState("");
     const [modalType,setType] = useState("todo");
+
+    // Get Class
+    function getClass(active:string){
+        return active === filter && "text-primary"; 
+    }
+
+    // Menu
+    const items:MenuProps['items'] = [{
+        label:(
+            <button className={`flex gap-3 items-centerw-full ${getClass("Done")}`} onClick={()=>handleFilter("Done")}>
+                <Check2/>
+                Done
+            </button>
+        ),
+        key:"FilterDone"
+    },
+    {
+        label:(
+            <button className={`flex gap-3 items-centerw-full ${getClass("Todo")}`} onClick={()=>handleFilter("Todo")}>
+                <ClipboardCheckFill/>
+                Todo
+            </button>
+        ),
+        key:"FilterDone"
+    }
+]
 
     // General Function
     function resetSnackbarState(){
@@ -47,13 +74,18 @@ export default function Todopage({username,categoryID}:{username:string,category
     }
     
     async function GetTodo(){
-        const {data:{data}} = await axios.get(`${import.meta.env.VITE_REACT_APP_API_URL}todo?categoriesID=${categoryID||""}&isCompleted=false`,{withCredentials:true})
+        let query = `&`;
+
+        if(filter === "Done") query +="isCompleted=true"
+        else if(filter === "Todo") query +="isCompleted=false"
+
+        const {data:{data}} = await axios.get(`${import.meta.env.VITE_REACT_APP_API_URL}todo?categoriesID=${categoryID||""}${query}`,{withCredentials:true})
         setTodo(data);
     }
 
     useEffect(()=>{
         GetTodo();
-    },[isModalShown])
+    },[isModalShown,filter])
 
 
     // Build Elements
@@ -85,6 +117,11 @@ export default function Todopage({username,categoryID}:{username:string,category
         setTodoField(e.target.value);
     }
 
+    function handleFilter(type:string){
+        if(type === filter) return setFilter("")
+        setFilter(type);
+    }
+
     async function HandleSubmit(){
         if(!todoField){
             return;
@@ -92,7 +129,7 @@ export default function Todopage({username,categoryID}:{username:string,category
 
         try{
             await axios.post(
-                `${import.meta.env.VITE_REACT_APP_API_URL}todo/${categoryID||""}`,
+                `${import.meta.env.VITE_REACT_APP_API_URL}todo?categoriesID=${categoryID||""}`,
                 {title:todoField},
                 {withCredentials:true})
 
@@ -141,6 +178,9 @@ export default function Todopage({username,categoryID}:{username:string,category
                         <header className='w-full py-2 px-5 flex gap-5'>
                             <input type="text" name="createTodo" className='TextField' placeholder='What is in your mind?' value={todoField} onChange={handleTextChange}/>
                             <button className='text-2xl bg-primary rounded-full p-2 text-white' onClick={HandleSubmit}><Plus/></button>
+                            <Dropdown menu={{items}} arrow={true} placement='bottomRight'>
+                                <button className='text-2xl bg-primary rounded-full p-2 text-white' onClick={HandleSubmit}><FunnelFill/></button>
+                            </Dropdown>
                         </header>
                         {
                             BuildTodo().length?
