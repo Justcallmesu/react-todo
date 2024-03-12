@@ -10,6 +10,7 @@ import Snackbar from "../base/Snackbar";
 import TheHeader from '../layout/TheHeader';
 import TodoCard from '../base/Todolist/TodoCard';
 import { Plus } from 'react-bootstrap-icons';
+import EmptyData from './error/EmptyData';
 
 export default function Todopage({username,categoryID}:{username:string,categoryID:string}){
     // Layout
@@ -111,13 +112,15 @@ export default function Todopage({username,categoryID}:{username:string,category
                             <input type="text" name="createTodo" className='TextField' placeholder='What is in your mind?' value={todoField} onChange={handleTextChange}/>
                             <button className='text-2xl bg-primary rounded-full p-2 text-white' onClick={HandleSubmit}><Plus/></button>
                         </header>
-                        <section className="w-full min-h-full px-5 py-5 grid grid-cols-5 grid-rows-3 gap-5">
+                        {
+                            BuildTodo().length?
+                            <section className="w-full min-h-full px-5 py-5 grid grid-cols-5 grid-rows-3 gap-5">
                             {
-                                BuildTodo().length?
-                                BuildTodo():
-                                <h1>Test</h1>
+                                BuildTodo()
                             }
-                        </section>            
+                            </section>:
+                            <EmptyData/>   
+                        }
                     </Content>
                 </Layout>
             </Layout>
