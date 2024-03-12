@@ -7,13 +7,13 @@ export default function TodoCard(
 
     {
         // Todo Data
-        title,date,isCompleted,_id,callback,categoryID,
+        title,date,isCompleted,_id,callback,
         // Modal State
         setIsModal,setIsError,setModalMessage
     }:
     {
         // Todo Data
-        title:string,date:string,isCompleted:boolean,_id:string,callback:Function,categoryID:string
+        title:string,date:string,isCompleted:boolean,_id:string,callback:Function,categoryID?:string
         
         // Modal State
         setIsModal:Function,setIsError:Function,setModalMessage:Function
@@ -36,18 +36,6 @@ export default function TodoCard(
         setModalMessage(message)
     }
 
-    async function HandleChackbox(e:BaseSyntheticEvent){
-        try{
-            await axios.put(`${import.meta.env.VITE_REACT_APP_API_URL}todo/${categoryID}/${_id}`,
-            {
-                title, isCompleted:e.target.checked
-            },{withCredentials:true})
-            callback()
-        }catch(error){
-            ModalError()
-        }
-    }
-
     function HandleScopedChange(e:BaseSyntheticEvent){
         setScopedTitle(e.target.value)
     }
@@ -55,7 +43,7 @@ export default function TodoCard(
 
     async function HandleDelete(){
         try{
-            await axios.delete(`${import.meta.env.VITE_REACT_APP_API_URL}todo/${categoryID}/${_id}`,{withCredentials:true})
+            await axios.delete(`${import.meta.env.VITE_REACT_APP_API_URL}todo/${_id}`,{withCredentials:true})
             ModalSuccess("Todo Deleted")
             callback()
         }catch(error){
@@ -70,7 +58,7 @@ export default function TodoCard(
     async function HandleFinish(){
         setIsUpdate(false)
         try{
-            await axios.put(`${import.meta.env.VITE_REACT_APP_API_URL}todo/${categoryID}/${_id}`,{title:scopedTitle},{withCredentials:true})
+            await axios.put(`${import.meta.env.VITE_REACT_APP_API_URL}todo/${_id}`,{title:scopedTitle},{withCredentials:true})
         }catch(error){
             ModalError()
         }
@@ -81,7 +69,6 @@ export default function TodoCard(
         <div className="w-full shadow-lg rounded-lg flex flex-col overflow-hidden">
             <header className="bg-primary px-5 py-2 flex justify-between items-center text-white">
                 <div className="flex gap-5 items-center">
-                    <input type="checkbox" checked={isCompleted} onChange={HandleChackbox}/>
                     <div>
                         <h5 className="font-bold ">{date}</h5>
                         <h6 className={`${isCompleted? "text-red-600":"text-white"} font-bold`}>{isCompleted? "DONE":"TODO"}</h6>
