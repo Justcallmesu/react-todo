@@ -7,7 +7,7 @@ export default function TodoCard(
 
     {
         // Todo Data
-        title,date,isCompleted,_id,callback,categoryID,
+        title,date,isCompleted,_id,callback,
         // Modal State
         setIsModal,setIsError,setModalMessage
     }:

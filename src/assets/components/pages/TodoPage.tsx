@@ -76,6 +76,8 @@ export default function Todopage({username}:{username:string}){
                     <Content>
                         <section className="w-full min-h-full px-5 py-5 flex flex-col gap-5">
                             {
+                                BuildTodo()?
+                                <h1>Test</h1>:
                                 BuildTodo()
                             }
                         </section>            

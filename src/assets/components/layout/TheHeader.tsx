@@ -10,7 +10,7 @@ import { NavLink } from "react-router-dom";
 import axios from "axios"
 
 
-export default function TheHeader({username,snackbarCallback,GetTodo}:{username:string,snackbarCallback:any,GetTodo:Function}){    
+export default function TheHeader({username}:{username:string,snackbarCallback:any,GetTodo:Function}){    
     // layout
     const {Header} = Layout;
 
