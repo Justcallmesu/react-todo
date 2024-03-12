@@ -1,12 +1,21 @@
 import axios from "axios";
 import {useState,useEffect,BaseSyntheticEvent} from "react";
 
-export default function Modal({modalCallback,resetModalState,id,type="todo",snackbarFunction}:{modalCallback:any,resetModalState:Function,id:string,type:string,snackbarFunction:any}){
+export default function Modal(
+    {modalCallback,resetModalState,id,type="todo",snackbarFunction}:
+    {modalCallback:any,resetModalState:Function,id:string,type:string,snackbarFunction:any}){
 
     const [titleText,setTitleText] = useState("");
     const [categories,setCategories] = useState([]);
     const [selected,setSelected] = useState("");
     
+    // Reset State
+    function resetState(){
+        setTitleText("");
+        setCategories([]);
+        setSelected("");
+    }
+
     // Use Context
     const {setIsSnackbar,setSnackbarMessage,setIsError} = snackbarFunction;
 
@@ -17,7 +26,28 @@ export default function Modal({modalCallback,resetModalState,id,type="todo",snac
             const {data:{data}} = response;
             setCategories(data);
         }catch(error){
-            
+            resetModalState()
+        }
+    }
+
+    async function getDataBasedById(){
+        if(!id) return;
+        if(type === "todo"){ 
+            const response = await axios.get(`${import.meta.env.VITE_REACT_APP_API_URL}todo/${id}`,{withCredentials:true})
+            try{
+                const {data:{data}} = response;
+                setTitleText(data[0].title);
+            }catch(error){
+                resetModalState()
+            }
+            return
+        }
+        const response = await axios.get(`${import.meta.env.VITE_REACT_APP_API_URL}category/${id}`,{withCredentials:true})
+        try{
+            const {data:{data}} = response;
+            setTitleText(data[0].title);
+        }catch(error){
+            resetModalState()
         }
     }
 
@@ -53,7 +83,7 @@ export default function Modal({modalCallback,resetModalState,id,type="todo",snac
             return
         }
 
-        const data = {title:titleText,categoriesID:selected};
+        const data = {title:titleText,categoriesID:selected === "none"?"":selected};
 
         if(id){
             await axios.put(`${import.meta.env.VITE_REACT_APP_API_URL}todo/${id}`,data,{withCredentials:true});
@@ -97,7 +127,9 @@ export default function Modal({modalCallback,resetModalState,id,type="todo",snac
     }
 
     useEffect(()=>{
+        resetState();
         getCategories();
+        getDataBasedById();
     },[])
 
     return(
@@ -120,7 +152,7 @@ export default function Modal({modalCallback,resetModalState,id,type="todo",snac
                                     <select name="categories" id="categories" className="TextField" value={selected}
                                     onChange={handleSelectOnChange}>
                                         <option disabled value="" hidden>Select Categories</option>
-                                        <option value="">None</option>
+                                        <option value="none">None</option>
                                         {
                                             buildSelect()
                                         }

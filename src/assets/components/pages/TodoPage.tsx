@@ -41,19 +41,19 @@ export default function Todopage({username,categoryID}:{username:string,category
 
     function resetModalSatate(){
         setIsModal(false);
-        setModalCallback(()=>{})
+        setModalCallback(()=>{});
         setTargetId("");
         setType("");
     }
     
     async function GetTodo(){
-        const {data:{data}} = await axios.get(`${import.meta.env.VITE_REACT_APP_API_URL}todo/${categoryID||""}?isCompleted=false`,{withCredentials:true})
+        const {data:{data}} = await axios.get(`${import.meta.env.VITE_REACT_APP_API_URL}todo?categoriesID=${categoryID||""}&isCompleted=false`,{withCredentials:true})
         setTodo(data);
     }
 
     useEffect(()=>{
         GetTodo();
-    },[])
+    },[isModalShown])
 
 
     // Build Elements
@@ -69,9 +69,11 @@ export default function Todopage({username,categoryID}:{username:string,category
 
             key={_id}
             isCompleted={isCompleted}
-            setIsModal={setIsSnackbar}
+            setIsSnackbar={setIsSnackbar}
             setIsError={setIsError}
-            setModalMessage={setSnackbarMessage}
+            setSnackbarMessage={setSnackbarMessage}
+
+            modalFunction={{isModalShown,setIsModal,setModalCallback,setTargetId,setType}}
             />
             )
         }

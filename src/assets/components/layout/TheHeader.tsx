@@ -38,12 +38,19 @@ export default function TheHeader({username,snackbarCallback,GetTodo,modalFuncti
         setType("categories")
     }
 
+    function handleUpdateCategory(id:string){
+        console.log(id);
+        setIsModal(true);
+        setModalCallback(GetCategory)
+        setType("categories")
+        setTargetId(id)
+    }
+
     // Get API
     async function GetCategory(){
         try{
             const {data:{data}} = await axios.get(`${import.meta.env.VITE_REACT_APP_API_URL}category`,{withCredentials:true});
             setCategories(data);
-            console.log(data);
         }catch(error){
             console.error(error);
         }
@@ -65,7 +72,7 @@ export default function TheHeader({username,snackbarCallback,GetTodo,modalFuncti
         const items:MenuProps['items'] = [
         {
             label:(
-                <button className="flex items-center gap-2">
+                <button className="flex items-center gap-2 w-full" onClick={()=>handleUpdateCategory(categoryID)}>
                     <PencilFill className="text-primary"/> Edit
                 </button>
             ),
@@ -76,7 +83,7 @@ export default function TheHeader({username,snackbarCallback,GetTodo,modalFuncti
         },
         {
         label:(
-            <button className="flex items-center gap-2" onClick={()=>HandleDeleteCategory(categoryID)}>
+            <button className="flex items-center gap-2 w-full" onClick={()=>HandleDeleteCategory(categoryID)}>
                 <Trash2Fill className="text-red-600"/> Delete
             </button>
         ),
