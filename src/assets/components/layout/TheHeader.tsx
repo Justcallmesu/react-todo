@@ -1,4 +1,4 @@
-import {BoxArrowRight, GearFill, PersonFill, PlusLg} from "react-bootstrap-icons"
+import {BoxArrowRight, GearFill, PencilFill, PersonFill, PlusLg, ThreeDots, ThreeDotsVertical, Trash, Trash2Fill} from "react-bootstrap-icons"
 
 // ANTD
 import {Layout,Dropdown} from 'antd'
@@ -22,19 +22,24 @@ export default function TheHeader({username}:{username:string,snackbarCallback:a
         await axios.get(`${import.meta.env.VITE_REACT_APP_API_URL}auth/logout`,{withCredentials:true})
     }
 
+    async function HandleDeleteCategory(id:string){
+        await axios.delete(`${import.meta.env.VITE_REACT_APP_API_URL}category/${id}`,{withCredentials:true});
+        GetCategory();
+    }
+
+    // Get API
+    async function GetCategory(){
+        try{
+            const {data:{data}} = await axios.get(`${import.meta.env.VITE_REACT_APP_API_URL}category`,{withCredentials:true});
+            setCategories(data);
+        }catch(error){
+            console.error(error);
+        }
+    }
+
+
     // Dropdown Menu
     const items:MenuProps['items'] = [
-        {
-            label:(
-                <NavLink to={"/auth/login"} onClick={HandleLogout} className="flex items-center gap-2">
-                    <GearFill className="text-primary"/> Settings
-                </NavLink>
-            ),
-            key:"settings"
-        },
-        {
-            type:"divider"
-        },
         {
         label:(
             <NavLink to={"/auth/login"} onClick={HandleLogout} className="flex items-center gap-2">
@@ -43,6 +48,31 @@ export default function TheHeader({username}:{username:string,snackbarCallback:a
         ),
         key:"logout"
     }]
+
+    function buildDropDownItems(categoryID:string){
+        const items:MenuProps['items'] = [
+        {
+            label:(
+                <button className="flex items-center gap-2">
+                    <PencilFill className="text-primary"/> Edit
+                </button>
+            ),
+            key:"Edit"
+        },
+        {
+            type:"divider"
+        },
+        {
+        label:(
+            <button className="flex items-center gap-2" onClick={()=>HandleDeleteCategory(categoryID)}>
+                <Trash2Fill className="text-red-600"/> Delete
+            </button>
+        ),
+        key:"Delete"
+    }]
+
+    return {items};   
+    }
 
     // BUILD ELEMENTS
     function buildCategoryNavLink(){
@@ -60,27 +90,20 @@ export default function TheHeader({username}:{username:string,snackbarCallback:a
         for(const data of categories){
             const {_id,title} = data
             elements.push(
-                <li key={_id}>
-                    <NavLink to={`/${_id}`}
+                <li key={_id} className="flex gap-2 items-center">
+                    <NavLink to={`/${_id}`} 
                         className={({isActive}) => [
                             isActive?"current-page":"",
                         ].join(" ")
                     }
                     >{title}</NavLink>
+                    <Dropdown menu={buildDropDownItems(_id)} arrow={true} placement="bottomRight">
+                        <ThreeDotsVertical className="cursor-pointer"/>
+                    </Dropdown>
                 </li>)
         }
 
         return elements;
-    }
-
-    // Get API
-    async function GetCategory(){
-        try{
-            const {data:{data}} = await axios.get(`${import.meta.env.VITE_REACT_APP_API_URL}category`,{withCredentials:true});
-            setCategories(data);
-        }catch(error){
-            console.error(error);
-        }
     }
 
     useEffect(()=>{
