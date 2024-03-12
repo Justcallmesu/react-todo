@@ -11,6 +11,7 @@ import TheHeader from '../layout/TheHeader';
 import TodoCard from '../base/Todolist/TodoCard';
 import { Plus } from 'react-bootstrap-icons';
 import EmptyData from './error/EmptyData';
+import Modal from '../base/Modal';
 
 export default function Todopage({username,categoryID}:{username:string,categoryID:string}){
     // Layout
@@ -20,16 +21,29 @@ export default function Todopage({username,categoryID}:{username:string,category
     const [todoField,setTodoField] = useState("");
 
 
-    // MODAL
+    // Snackbar
     const [isSnackbarShown, setIsSnackbar] = useState(false)
     const [snackbarMessage, setSnackbarMessage] = useState("")
     const [isError,setIsError] = useState(false)
 
+    // Modal
+    const [isModalShown, setIsModal] = useState(true)
+    const [modalCallback,setModalCallback] = useState(()=>{})
+    const [targetId,setTargetId] = useState("");
+    const [modalType,setType] = useState("todo");
+
     // General Function
     function resetSnackbarState(){
-        setIsError(false)
-        setSnackbarMessage("")
-        setIsSnackbar(false)
+        setIsError(false);
+        setSnackbarMessage("");
+        setIsSnackbar(false);
+    }
+
+    function resetModalSatate(){
+        setIsModal(false);
+        setModalCallback(()=>{})
+        setTargetId("");
+        setType("");
     }
     
     async function GetTodo(){
@@ -98,13 +112,23 @@ export default function Todopage({username,categoryID}:{username:string,category
     },[categoryID])
 
     return(
-        <>
+        <>  
             {
                 isSnackbarShown && 
                 // Modal
                 <Snackbar message={snackbarMessage} isError={isError} resetState={resetSnackbarState}/>
             }
-            <Layout className="w-full h-full shadow-2xl overflow-auto relative">
+            {
+                isModalShown&&
+                <Modal 
+                modalCallback={modalCallback}
+                resetModalState={resetModalSatate}
+                id={targetId}
+                type={modalType}
+                snackbarFunction={{setIsSnackbar,setSnackbarMessage,setIsError}}
+                />
+            }
+                <Layout className="w-full h-full shadow-2xl overflow-auto relative">
                 <Layout>
                     <TheHeader username={username} GetTodo={GetTodo} snackbarCallback={{setSnackbarMessage,setIsError,setIsSnackbar}}/>
                     <Content>
