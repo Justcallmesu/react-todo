@@ -1,4 +1,4 @@
-import {BoxArrowRight, GearFill, PencilFill, PersonFill, PlusLg, ThreeDots, ThreeDotsVertical, Trash, Trash2Fill} from "react-bootstrap-icons"
+import {BoxArrowRight, PencilFill, PersonFill, PlusLg, ThreeDotsVertical, Trash2Fill} from "react-bootstrap-icons"
 
 // ANTD
 import {Layout,Dropdown} from 'antd'

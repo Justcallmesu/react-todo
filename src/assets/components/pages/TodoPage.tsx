@@ -73,12 +73,22 @@ export default function Todopage({username,categoryID}:{username:string,category
             return;
         }
 
-        await axios.post(
-            `${import.meta.env.VITE_REACT_APP_API_URL}todo/${categoryID||""}`,
-            {title:todoField},
-            {withCredentials:true})
-    
+        try{
+            await axios.post(
+                `${import.meta.env.VITE_REACT_APP_API_URL}todo/${categoryID||""}`,
+                {title:todoField},
+                {withCredentials:true})
+
+            setIsError(false)
+            setSnackbarMessage("Todo Added")
+            setIsSnackbar(true)
+        }catch(error){
+            setIsError(true)
+            setSnackbarMessage("Post Fail to Added")
+            setIsSnackbar(true)
+        }
         GetTodo()
+        setTodoField("")
     }
 
     // UseEffect
@@ -98,7 +108,7 @@ export default function Todopage({username,categoryID}:{username:string,category
                     <TheHeader username={username} GetTodo={GetTodo} snackbarCallback={{setSnackbarMessage,setIsError,setIsSnackbar}}/>
                     <Content>
                         <header className='w-full py-2 px-5 flex gap-5'>
-                            <input type="text" name="createTodo" className='TextField' placeholder='What is in your mind?' onChange={handleTextChange}/>
+                            <input type="text" name="createTodo" className='TextField' placeholder='What is in your mind?' value={todoField} onChange={handleTextChange}/>
                             <button className='text-2xl bg-primary rounded-full p-2 text-white' onClick={HandleSubmit}><Plus/></button>
                         </header>
                         <section className="w-full min-h-full px-5 py-5 grid grid-cols-5 grid-rows-3 gap-5">
