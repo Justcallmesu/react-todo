@@ -5,12 +5,15 @@ import {Layout,Dropdown} from 'antd'
 import type { MenuProps } from "antd";
 
 import { useEffect, useState} from 'react';
-import { NavLink } from "react-router-dom";
+import { NavLink,useNavigate } from "react-router-dom";
 
 import axios from "axios"
 
 
 export default function TheHeader({username,snackbarCallback,modalFunction}:{username:string,snackbarCallback:any,modalFunction:any}){    
+    // Navigate
+    const navigate = useNavigate();
+    
     // Modal
     const {isModalShown, setIsModal,setModalCallback,setTargetId,setType} = modalFunction;
     const {setIsSnackbar,setSnackbarMessage} = snackbarCallback
@@ -30,6 +33,7 @@ export default function TheHeader({username,snackbarCallback,modalFunction}:{use
         setSnackbarMessage("Category Deleted")
         setIsSnackbar(true);
         GetCategory();
+        navigate("/")
     }
 
     function handleAddCategory(){

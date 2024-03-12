@@ -3,7 +3,6 @@ import {Pencil, Trash2Fill } from "react-bootstrap-icons"
 
 
 export default function TodoCard(
-
     {
         // Todo Data
         title,date,isCompleted,_id,callback,
@@ -17,9 +16,7 @@ export default function TodoCard(
         
         // Modal State
         setIsSnackbar:Function,setIsError:Function,setSnackbarMessage:Function, modalFunction:any
-    },
-    
-    ){
+    }){
 
     // Modal
     const { setIsModal,setTargetId,setType} = modalFunction;
@@ -51,10 +48,15 @@ export default function TodoCard(
         setTargetId(_id)
     }
 
+    async function handleUpdateStatus(){
+        await axios.put(`${import.meta.env.VITE_REACT_APP_API_URL}todo/${_id}`,{isCompleted:!isCompleted},{withCredentials:true});
+        callback();
+    }
 
     return(
         <div className="w-full shadow-lg rounded-lg flex flex-col overflow-hidden">
-            <header className="bg-primary px-5 py-2 flex justify-between items-center text-white">
+            <header className="bg-primary px-4 py-2 flex justify-between items-center text-white">
+                <input type="checkbox" onChange={handleUpdateStatus} checked={isCompleted}/>
                 <div className="flex gap-5 items-center">
                     <div>
                         <h5 className="font-bold ">{date}</h5>
