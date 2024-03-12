@@ -10,7 +10,10 @@ import { NavLink } from "react-router-dom";
 import axios from "axios"
 
 
-export default function TheHeader({username}:{username:string,snackbarCallback:any,GetTodo:Function}){    
+export default function TheHeader({username,snackbarCallback,modalFunction}:{username:string,snackbarCallback:any,modalFunction:any}){    
+    // Modal
+    const {isModalShown, setIsModal,setModalCallback,setTargetId,setType} = modalFunction;
+    const {setIsSnackbar,setSnackbarMessage} = snackbarCallback
     // layout
     const {Header} = Layout;
 
@@ -24,7 +27,23 @@ export default function TheHeader({username}:{username:string,snackbarCallback:a
 
     async function HandleDeleteCategory(id:string){
         await axios.delete(`${import.meta.env.VITE_REACT_APP_API_URL}category/${id}`,{withCredentials:true});
+        setSnackbarMessage("Category Deleted")
+        setIsSnackbar(true);
         GetCategory();
+    }
+
+    function handleAddCategory(){
+        setIsModal(true);
+        setModalCallback(GetCategory)
+        setType("categories")
+    }
+
+    function handleUpdateCategory(id:string){
+        console.log(id);
+        setIsModal(true);
+        setModalCallback(GetCategory)
+        setType("categories")
+        setTargetId(id)
     }
 
     // Get API
@@ -53,7 +72,7 @@ export default function TheHeader({username}:{username:string,snackbarCallback:a
         const items:MenuProps['items'] = [
         {
             label:(
-                <button className="flex items-center gap-2">
+                <button className="flex items-center gap-2 w-full" onClick={()=>handleUpdateCategory(categoryID)}>
                     <PencilFill className="text-primary"/> Edit
                 </button>
             ),
@@ -64,7 +83,7 @@ export default function TheHeader({username}:{username:string,snackbarCallback:a
         },
         {
         label:(
-            <button className="flex items-center gap-2" onClick={()=>HandleDeleteCategory(categoryID)}>
+            <button className="flex items-center gap-2 w-full" onClick={()=>HandleDeleteCategory(categoryID)}>
                 <Trash2Fill className="text-red-600"/> Delete
             </button>
         ),
@@ -78,7 +97,7 @@ export default function TheHeader({username}:{username:string,snackbarCallback:a
     function buildCategoryNavLink(){
         const elements:Array<JSX.Element>=[
                 <li>
-                    <NavLink to={'/'}
+                    <NavLink to={'/'} key="root"
                         className={({isActive}) => [
                             isActive?"current-page":"",
                         ].join(" ")
@@ -108,7 +127,7 @@ export default function TheHeader({username}:{username:string,snackbarCallback:a
 
     useEffect(()=>{
         GetCategory();
-    },[])
+    },[isModalShown])
 
     return(
         <Header className="sticky top-0 w-full h-fit p-0 bg-primary flex flex-col items-center shadow-md">
@@ -128,7 +147,7 @@ export default function TheHeader({username}:{username:string,snackbarCallback:a
                         buildCategoryNavLink()
                     }
                     <li >
-                        <button className="flex items-center">
+                        <button className="flex items-center" onClick={handleAddCategory}>
                             <PlusLg/>
                         </button>
                     </li>

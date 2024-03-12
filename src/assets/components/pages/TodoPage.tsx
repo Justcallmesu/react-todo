@@ -27,8 +27,8 @@ export default function Todopage({username,categoryID}:{username:string,category
     const [isError,setIsError] = useState(false)
 
     // Modal
-    const [isModalShown, setIsModal] = useState(true)
-    const [modalCallback,setModalCallback] = useState(()=>{})
+    const [isModalShown, setIsModal] = useState(false)
+    const [modalCallback,setModalCallback] = useState(function():any{return;})
     const [targetId,setTargetId] = useState("");
     const [modalType,setType] = useState("todo");
 
@@ -41,19 +41,19 @@ export default function Todopage({username,categoryID}:{username:string,category
 
     function resetModalSatate(){
         setIsModal(false);
-        setModalCallback(()=>{})
+        setModalCallback(()=>{});
         setTargetId("");
         setType("");
     }
     
     async function GetTodo(){
-        const {data:{data}} = await axios.get(`${import.meta.env.VITE_REACT_APP_API_URL}todo/${categoryID||""}?isCompleted=false`,{withCredentials:true})
+        const {data:{data}} = await axios.get(`${import.meta.env.VITE_REACT_APP_API_URL}todo?categoriesID=${categoryID||""}&isCompleted=false`,{withCredentials:true})
         setTodo(data);
     }
 
     useEffect(()=>{
         GetTodo();
-    },[])
+    },[isModalShown])
 
 
     // Build Elements
@@ -69,9 +69,11 @@ export default function Todopage({username,categoryID}:{username:string,category
 
             key={_id}
             isCompleted={isCompleted}
-            setIsModal={setIsSnackbar}
+            setIsSnackbar={setIsSnackbar}
             setIsError={setIsError}
-            setModalMessage={setSnackbarMessage}
+            setSnackbarMessage={setSnackbarMessage}
+
+            modalFunction={{isModalShown,setIsModal,setModalCallback,setTargetId,setType}}
             />
             )
         }
@@ -130,7 +132,11 @@ export default function Todopage({username,categoryID}:{username:string,category
             }
                 <Layout className="w-full h-full shadow-2xl overflow-auto relative">
                 <Layout>
-                    <TheHeader username={username} GetTodo={GetTodo} snackbarCallback={{setSnackbarMessage,setIsError,setIsSnackbar}}/>
+                    <TheHeader
+                    username={username}
+                    snackbarCallback={{setSnackbarMessage,setIsError,setIsSnackbar}}
+                    modalFunction={{isModalShown,setIsModal,setModalCallback,setTargetId,setType}}
+                    />
                     <Content>
                         <header className='w-full py-2 px-5 flex gap-5'>
                             <input type="text" name="createTodo" className='TextField' placeholder='What is in your mind?' value={todoField} onChange={handleTextChange}/>
