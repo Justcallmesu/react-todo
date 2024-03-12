@@ -1,7 +1,7 @@
 import axios from "axios";
 import {useState,useEffect,BaseSyntheticEvent} from "react";
 
-export default function Modal({modalCallback,resetModalState,id,type="todo",snackbarFunction}:{modalCallback:void,resetModalState:Function,id:string,type:string,snackbarFunction:any}){
+export default function Modal({modalCallback,resetModalState,id,type="todo",snackbarFunction}:{modalCallback:any,resetModalState:Function,id:string,type:string,snackbarFunction:any}){
 
     const [titleText,setTitleText] = useState("");
     const [categories,setCategories] = useState([]);
@@ -57,7 +57,7 @@ export default function Modal({modalCallback,resetModalState,id,type="todo",snac
 
         if(id){
             await axios.put(`${import.meta.env.VITE_REACT_APP_API_URL}todo/${id}`,data,{withCredentials:true});
-            modalCallback
+            await modalCallback;
             resetModalState()
             
             setSnackbarMessage("Todo Updated")
@@ -79,11 +79,11 @@ export default function Modal({modalCallback,resetModalState,id,type="todo",snac
 
         if(id){
             await axios.put(`${import.meta.env.VITE_REACT_APP_API_URL}category/${id}`,data,{withCredentials:true});
-            modalCallback
             resetModalState()
-
+            
             setSnackbarMessage("Category Updated")
             setIsSnackbar(true);
+            await modalCallback;
             return;
         }
 
@@ -92,8 +92,8 @@ export default function Modal({modalCallback,resetModalState,id,type="todo",snac
         setSnackbarMessage("Category Posted")
         setIsSnackbar(true);
 
-        modalCallback
-        resetModalState()
+        await modalCallback;
+        resetModalState();
     }
 
     useEffect(()=>{

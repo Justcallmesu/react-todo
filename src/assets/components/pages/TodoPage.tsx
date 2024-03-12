@@ -27,8 +27,8 @@ export default function Todopage({username,categoryID}:{username:string,category
     const [isError,setIsError] = useState(false)
 
     // Modal
-    const [isModalShown, setIsModal] = useState(true)
-    const [modalCallback,setModalCallback] = useState(()=>{})
+    const [isModalShown, setIsModal] = useState(false)
+    const [modalCallback,setModalCallback] = useState(function():any{return;})
     const [targetId,setTargetId] = useState("");
     const [modalType,setType] = useState("todo");
 
@@ -130,7 +130,12 @@ export default function Todopage({username,categoryID}:{username:string,category
             }
                 <Layout className="w-full h-full shadow-2xl overflow-auto relative">
                 <Layout>
-                    <TheHeader username={username} GetTodo={GetTodo} snackbarCallback={{setSnackbarMessage,setIsError,setIsSnackbar}}/>
+                    <TheHeader
+                    username={username}
+                    GetTodo={GetTodo}
+                    snackbarCallback={{setSnackbarMessage,setIsError,setIsSnackbar}}
+                    modalFunction={{isModalShown,setIsModal,setModalCallback,setTargetId,setType}}
+                    />
                     <Content>
                         <header className='w-full py-2 px-5 flex gap-5'>
                             <input type="text" name="createTodo" className='TextField' placeholder='What is in your mind?' value={todoField} onChange={handleTextChange}/>

@@ -10,7 +10,10 @@ import { NavLink } from "react-router-dom";
 import axios from "axios"
 
 
-export default function TheHeader({username}:{username:string,snackbarCallback:any,GetTodo:Function}){    
+export default function TheHeader({username,snackbarCallback,GetTodo,modalFunction}:{username:string,snackbarCallback:any,GetTodo:Function,modalFunction:any}){    
+    // Modal
+    const {isModalShown, setIsModal,setModalCallback,setTargetId,setType} = modalFunction;
+    const {setIsSnackbar,setSnackbarMessage,setIsError} = snackbarCallback
     // layout
     const {Header} = Layout;
 
@@ -24,7 +27,15 @@ export default function TheHeader({username}:{username:string,snackbarCallback:a
 
     async function HandleDeleteCategory(id:string){
         await axios.delete(`${import.meta.env.VITE_REACT_APP_API_URL}category/${id}`,{withCredentials:true});
+        setSnackbarMessage("Category Deleted")
+        setIsSnackbar(true);
         GetCategory();
+    }
+
+    function handleAddCategory(){
+        setIsModal(true);
+        setModalCallback(GetCategory)
+        setType("categories")
     }
 
     // Get API
@@ -32,6 +43,7 @@ export default function TheHeader({username}:{username:string,snackbarCallback:a
         try{
             const {data:{data}} = await axios.get(`${import.meta.env.VITE_REACT_APP_API_URL}category`,{withCredentials:true});
             setCategories(data);
+            console.log(data);
         }catch(error){
             console.error(error);
         }
@@ -78,7 +90,7 @@ export default function TheHeader({username}:{username:string,snackbarCallback:a
     function buildCategoryNavLink(){
         const elements:Array<JSX.Element>=[
                 <li>
-                    <NavLink to={'/'}
+                    <NavLink to={'/'} key="root"
                         className={({isActive}) => [
                             isActive?"current-page":"",
                         ].join(" ")
@@ -108,7 +120,7 @@ export default function TheHeader({username}:{username:string,snackbarCallback:a
 
     useEffect(()=>{
         GetCategory();
-    },[])
+    },[isModalShown])
 
     return(
         <Header className="sticky top-0 w-full h-fit p-0 bg-primary flex flex-col items-center shadow-md">
@@ -128,7 +140,7 @@ export default function TheHeader({username}:{username:string,snackbarCallback:a
                         buildCategoryNavLink()
                     }
                     <li >
-                        <button className="flex items-center">
+                        <button className="flex items-center" onClick={handleAddCategory}>
                             <PlusLg/>
                         </button>
                     </li>
