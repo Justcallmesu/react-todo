@@ -83,7 +83,7 @@ export default function Modal(
             return
         }
 
-        const data = {title:titleText,categoriesID:selected === "none"?"":selected};
+        const data = {title:titleText,categoriesID:selected};
 
         if(id){
             await axios.put(`${import.meta.env.VITE_REACT_APP_API_URL}todo/${id}`,data,{withCredentials:true});
